@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mezo Bot Video Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            outline: none;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+            color: #555;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Mezo Bot Video Player</h1>
+            <p>مشغل الفيديو الخاص بـ Mezo Bot</p>
+        </div>
+
+        <div class="video-wrapper">
+            <video id="videoPlayer" controls>
+                <source src="./mezo.mp4" type="video/mp4">
+                متصفحك لا يدعم تشغيل الفيديو
+            </video>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="playVideo()">▶️ تشغيل</button>
+            <button class="btn" onclick="pauseVideo()">⏸️ إيقاف مؤقت</button>
+            <button class="btn" onclick="restartVideo()">🔄 إعادة التشغيل</button>
+            <button class="btn-secondary" onclick="toggleFullscreen()">🖥️ ملء الشاشة</button>
+        </div>
+
+        <div class="info" id="videoInfo">
+            <p>⏱️ المدة: <span id="duration">--:--</span> | ⏰ الوقت الحالي: <span id="currentTime">00:00</span></p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const durationSpan = document.getElementById('duration');
+        const currentTimeSpan = document.getElementById('currentTime');
+
+        // تحديث معلومات الفيديو
+        video.addEventListener('loadedmetadata', function() {
+            durationSpan.textContent = formatTime(video.duration);
+        });
+
+        video.addEventListener('timeupdate', function() {
+            currentTimeSpan.textContent = formatTime(video.currentTime);
+        });
+
+        // دوال التحكم
+        function playVideo() {
+            video.play();
+        }
+
+        function pauseVideo() {
+            video.pause();
+        }
+
+        function restartVideo() {
+            video.currentTime = 0;
+            video.play();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                video.requestFullscreen().catch(err => {
+                    alert('لا يمكن تفعيل وضع ملء الشاشة: ' + err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // تشغيل تلقائي عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            video.volume = 0.7; // ضبط مستوى الصوت
+        });
+
+        // معالجة الأخطاء
+        video.addEventListener('error', function() {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = '❌ خطأ في تحميل الفيديو. تأكد من وجود ملف mezo.mp4 في المجلد الرئيسي';
+            document.querySelector('.container').appendChild(errorDiv);
+        });
+    </script>
+</body>
+</html>
